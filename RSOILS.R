@@ -36,6 +36,8 @@ WCFC_cal <- function(S,C,OM) {
 WCFC_cal(S, C,OM)
 
 
+
+
 WCST_cal <- function(S,C,OM) {
     WCST_i <- 0.278*S + 0.034*C + 0.022*OM -
         0.006*(S*OM) - 0.027*(C*OM) +
@@ -46,6 +48,8 @@ WCST_cal <- function(S,C,OM) {
     return(WCST)
     
 }
+
+WCST_cal(S,C,OM)
 
 
 

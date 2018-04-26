@@ -15,31 +15,33 @@
 #     8      mean wind speed         m s-1                                                        
 #     9      precipitation          mm d-1
 
-DATA <- read.csv(paste0(getwd(),"//", "weather_input.csv"),header = T) %>%
-        mutate(Station_number = 1,
-           Year = year(DATE),
-           Day = yday(DATE),
-           SRAD = round(SRAD, 2),
-           TMAX = round(TMAX, 2),
-           TMIN = round(TMIN, 2),
-           RAIN = round(RAIN, 2),
-           VPD = -99, 
-           WS = -99) %>%
-    select(Station_number, Year, Day, SRAD, TMIN, TMAX, VPD, WS, RAIN)
-
-
-Make_WTH_ORYZA <- function(DATA) {
+Make_WTH_ORYZA <- function(filename) {
+    
+    DATA <- read.csv(paste0(getwd(),"//", filename),header = T) %>%
+        mutate(DATE = as.Date(DATE, format= "%m/%d/%Y"),
+               Station_number = 1,
+               Year = year(DATE),
+               Day = yday(DATE),
+               SRAD = round(SRAD, 2),
+               TMAX = round(TMAX, 2),
+               TMIN = round(TMIN, 2),
+               RAIN = round(RAIN, 2),
+               VPD = -99, 
+               WS = -99) %>%
+        select(Station_number, Year, Day, SRAD, TMIN, TMAX, VPD, WS, RAIN)
+    
     
 dir.create(paste0(getwd(),"/WTH"), showWarnings = FALSE)
-set_head <- paste(LON, LAT, ALT, 0, 0, sep = ",")    
+set_head <- paste(lon, lat, alt, 0, 0, sep = ",")    
 #DATA=read.table(file, head=T)  
 year_i=min(DATA$Year)
 year_f=max(DATA$Year)
 
 
 #Crea matrix para orgnizar datos
-year=cbind(year_i:year_f)
-year=as.data.frame(year)
+year=cbind(year_i:year_f) %>%
+    as.data.frame()
+
 
 dates_wth=str_sub(year[1,1],-3,-1)
 
@@ -63,10 +65,9 @@ for (n in year_i:year_f){
     sink()
     
 }
-
-    
+print("DONE!")
 }
 
-Make_WTH_ORYZA(DATA)
+Make_WTH_ORYZA("weather_input.csv")
   
   
