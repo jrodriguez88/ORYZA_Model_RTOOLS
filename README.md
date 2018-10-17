@@ -1,15 +1,9 @@
----
-title: "ORYZA_Model_RTOOLS: Tools for Rice Crop Simulation with ORYZA V3.0"
-author: "Jeferson Rodriguez E"
-website: "https://github.com/jrodriguez88"
-licence: "Licence GPL-2"
-output:
-  html_document:
-    df_print: paged
----
-##### Contact: [LinkedIn](https://www.linkedin.com/in/jeferson-rodriguez-espinoza-24749625/)
 
-##### Repository: [GitHub](https://github.com/jrodriguez88/ORYZA_Model_RTOOLS)
+# ORYZA_Model_RTOOLS: Tools for Rice Crop Simulation with ORYZA V3.0
+### *Rodriguez-Espinoza J.*
+#### International Center for Tropical Agriculture
+#### Contact: [Email](mailto:j.r.espinosa@cgiar.org) - [LinkedIn](https://www.linkedin.com/in/jeferson-rodriguez-espinoza-24749625/)
+#### Repository: [GitHub](https://github.com/jrodriguez88/ORYZA_Model_RTOOLS)
 
 ## Description
 Project with many tools to use ORYZA crop model. It Includes functions to create input files (weather `*.WTH`, soil `*.SOL`, experimental `*.EXP`), estimate parameters (crop, weather and soil), import and visualize outputs. It will conect with [ORYZA_AUTO_PARAM](https://github.com/jrodriguez88/ORYZA_AUTO_PARAM) tool to compute diferent parameters required in the crop model parametrization and calibration.
