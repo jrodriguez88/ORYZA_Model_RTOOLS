@@ -1,0 +1,90 @@
+#########################################################
+####            Make_SPGF ORYZA_Model_RTOOLS         ####
+####     By https://github.com/jrodriguez88          ####
+####      ORYZA Rice Crop Model described in:        #### 
+####   http://books.irri.org/9712201716_content.pdf  ####
+#########################################################
+
+# SPGF: The spikelet growth formation factor (SPGF; number kg−1) was derived as
+#       the slope of the relationship between spikelet number m−2 and growth of the
+#       crop between panicle initiation and flowering (g m-2)
+
+
+#library(tidyverse)
+#library(lubridate)
+
+dirfol <- getwd()
+#CULTIVAR <- "FED2000"
+
+## SPGF_cal function compute SPGF from experimental data, It take yield traits (spikelet number), 
+##          growth data (biomass) and phenology observation to find the relationship between spikelet
+##          number and and crop growth between panicle initiation and flowering.
+
+## Function to extract variables (from INPUT_data.xls template) requiere to SPGF calculation
+SPGF_cal <- function(dirfol=dirfol, filename) {
+    
+ ##Load data for each workbook (XLSX)   
+    INPUT_data <- read_INPUT_data(filename)
+    
+ ##Extract Spikelets number from YIELD_obs and join with Phenology observations (PHEN_bs)   
+    SPIK_by_EXP <- INPUT_data$YIELD_obs %>%
+        mutate(SPIK_M2_avg=PAN_M2*GT_PAN,
+               SPIK_M2_min=(PAN_M2-PAN_M2_SD)*(GT_PAN-GT_PAN_SD),
+               SPIK_M2_max=(PAN_M2+PAN_M2_SD)*(GT_PAN+GT_PAN_SD))%>%
+        left_join(INPUT_data$PHEN_obs, by="ID")%>%
+        select(ID, contains("SPIK_M2"), IDAT, FDAT)
+    
+ ##Extract  Total dry weight at panicle initiation or closest sampling date
+    WAGT_PI <- INPUT_data$PLANT_gro %>%
+        inner_join(SPIK_by_EXP, by="ID") %>%
+        mutate(diff_pi=abs(as.integer(difftime(SAMPLING_DATE, IDAT, units = "days"))),
+               WAGT_PI=WAGT_OBS, 
+               WAGT_PI_SD=WAGT_SD)%>%
+        group_by(ID) %>%
+        filter(diff_pi==min(diff_pi))%>%
+        select(ID, diff_pi, contains("WAGT_PI"))
+    
+ ##Extract  Total dry weight at flowering initiation or closest sampling date    
+    WAGT_FL <- INPUT_data$PLANT_gro %>%
+        inner_join(SPIK_by_EXP, by="ID") %>%
+        mutate(diff_fl=abs(as.integer(difftime(SAMPLING_DATE, FDAT, units = "days"))),
+               WAGT_FL=WAGT_OBS, 
+               WAGT_FL_SD=WAGT_SD)%>%
+        group_by(ID) %>%
+        filter(diff_fl==min(diff_fl))%>%
+        select(ID, diff_fl, contains("WAGT_FL"))
+    
+  ##Join data and compute variables to SPGF calculation  
+    SPIK_by_EXP %>%
+        left_join(WAGT_PI, by = "ID")%>%left_join(WAGT_FL, by = "ID") %>%
+        mutate(diff_pi_fl=(WAGT_FL-WAGT_PI)/10) #(g/m²)
+}
+
+
+## Create SPGF_df: Compute SPGF variables by locality and bind rows 
+SPGF_df <- lapply(list.files(path = dirfol, pattern = ".xlsx"), function(x){SPGF_cal(filename=x)})%>%
+    bind_rows()%>%mutate(LOC_ID=substr(ID, 1,4))
+
+## Linear model between Spikelet number (number/ m²) and crop growth between panicle initiation and flowering (g/m²)
+lm_spgf <- lm(formula=SPIK_M2_avg ~ diff_pi_fl, data = SPGF_df)
+
+## Print SPGF compute from lm-slope
+print(paste0("SPGF = ", round(coef(lm_spgf)[[2]]*1000), ".", "    ! Spikelet growth factor (no kg-1)"))
+
+## Scatterplot data and lm coef
+plot_spgf <- ggplot(SPGF_df, aes(diff_pi_fl, SPIK_M2_avg))+
+    geom_point(aes(color=LOC_ID))+
+    geom_smooth(method = "lm", se = F)+
+    theme_bw()+
+    xlab("Growth between PI and flowering (g/m²)")+
+    ylab("Spikelets/m²")+
+    annotate("text", x=-Inf, y=c(max(SPGF_df$SPIK_M2_avg), max(SPGF_df$SPIK_M2_avg)*0.95, max(SPGF_df$SPIK_M2_avg)*0.90, max(SPGF_df$SPIK_M2_avg)*0.85) , hjust=-0.1,vjust=0, 
+             label=c(paste0("y = ", round(summary(lm_spgf)$`coefficients`[2,1],2),"x"),
+                     paste("n =", length(SPGF_df)),
+                     paste("r² =", round(summary(lm_spgf)$`r.squared`,2)), 
+                     paste("Pr(>|t|) =", round(summary(lm_spgf)$`coefficients`[2,4],4))))
+
+
+print(plot_spgf)
+
+##
