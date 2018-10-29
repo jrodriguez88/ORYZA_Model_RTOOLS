@@ -2,20 +2,29 @@ library(tidyverse)
 
 ## Make Soil
 load("SOILDB_raw.RData")
-data -> raw_data
-soil_data <- data
+data -> raw_data <- soil_data
 soil_data <- split(soil_data, soil_data$ID)
+path <- getwd()
 
+### ZRTMS Maximum rooting depth in the soil (m), 
+### WL0I Initial ponded water depth at start of simulation (mm)"
+### WCLI can take 3 values: Field Capacity ('FC'), 50% of Soil Saturation ('ST50'), Fraction of water content ('0.0'- '1.0') 
+### RIWCLI Re-initialize switch RIWCLI is YES or NO
+### SATAV Soil annual average temperature of the first layers
 
-Make_soil_ORYZA <- function(data, ZRTMS = 0.45, WL0I = 0, WCLI='0.3' , RIWCLI = 'NO', SATAV=20){
-inpp <- function(x, div=1){paste0(round(data[,x]/div,2), collapse = ", ")}
+Make_soil_ORYZA <- function(data, path, ZRTMS = 0.45, WL0I = 0, WCLI='0.3' , RIWCLI = 'NO', SATAV=20){
+    stopifnot(require(tidyverse)==T)
+    inpp <- function(x, div=1){paste0(round(data[,x]/div,2), collapse = ", ")}
+    dirfol <- paste0(path,'/', 'SOIL')
+    dir.create((paste0(path,"/SOIL")), showWarnings = FALSE)
+
 data <- data %>%
     mutate(DEPTH=20, KST=c(100, 150, 170), WCAD=10, 
            SOC=DEPTH*SBDM*100*SCARBON/0.58,
            SON=DEPTH*SBDM*SLON/10,
            SNH4X=DEPTH*SBDM*SNH4/10,
            SNO3X=DEPTH*SBDM*SNO3/10)
-sink(file=paste0(unique(data["ID"]), ".sol"), append = F)
+sink(file=paste0(dirfol,'/', unique(data["ID"]), ".sol"), append = F)
 
 ########################################
 ### 0. Head_sol
@@ -225,5 +234,4 @@ writeLines(a[1:nrow(data)])
 sink()
 }
 
-
-#lapply(soil_data, Make_soil_ORYZA)
+lapply(soil_data, Make_soil_ORYZA, path=path)
