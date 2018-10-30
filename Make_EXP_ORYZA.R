@@ -22,7 +22,6 @@ if(require(lubridate)==FALSE){install.packages("lubridate")}
 if(require(readxl)==FALSE){install.packages("readxl")}
 if(require(RCurl)==FALSE){install.packages("RCurl")}
 if(require(tidyverse)==FALSE){install.packages("tidyverse")}
-if(require(stringr)==FALSE){install.packages("stringr")}
 if(require(magrittr)==FALSE){install.packages("magrittr")}
 if(require(data.table)==FALSE){install.packages("data.table")}
 if(require(plyr)==FALSE){install.packages("plyr")}
@@ -226,8 +225,8 @@ irrig_oryza <- function(){
         ##ICOMBA switch critical (1:4)-->c(yday,DVS,DVS-yday, DAE)
         cat(paste0("ICOMBA = ", 1), sep = '\n')
         cat("IRMTAB = ", sep = '\n')
-        cat(paste0("0., ",1,".0,"),sep = '\n')
-        cat(paste0("366., ",1, ".0"),sep = '\n')
+        cat(paste0("0., ",if (INPUT_data$AGRO_man$CROP_SYS[i]=="RAINFED"){0} else{2},".0,"),sep = '\n')
+        cat(paste0("366., ",if (INPUT_data$AGRO_man$CROP_SYS[i]=="RAINFED"){0} else{2}, ".0"),sep = '\n')
         cat(paste0("AUTODEPT = ", "-10.0"),sep = '\n')
 
 ##SWITIR Irrigation Settongs (1:6)---Automatic use SWITIR=2
