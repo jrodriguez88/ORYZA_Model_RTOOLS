@@ -17,21 +17,30 @@
 #     8      mean wind speed         m s-1                                                        
 #     9      precipitation          mm d-1
 
+
 ## Make_WTH_ORYZA function compute weather information to ORYZA weather file.
-## 'data':  csv file name or data.frame.
+## 'data':  csv file name or data.frame. 
+#           str-> 
+#                ..$ DATE: Date ->(mdy)
+#                ..$ TMAX: num  ->(oC)
+#                ..$ TMIN: num  ->(oC) 
+#                ..$ RAIN: num  ->(mm) 
+#                ..$ SRAD: num  ->(MJ) 
+#                ..$ RHUM: num  ->(%) 
 ## 'path':  path folder or working directory
-## 'local': 4 letters string of locality name
+## 'local': 4 letters string of locality name. "AIHU"--> Aipe, Huila
 ## 'lat':   latitud (decimal degrees)
 ## 'lon':   longitud (decimal degrees)
 ## 'alt':   altitude (meters above sea level)
 
-Make_WTH_ORYZA <- function(data, path, local, lat, lon, alt) {
+
+Make_WTH_ORYZA <- function(data, path, local, lat, lon, alt, stn=1) {
     stopifnot(require(tidyverse)==T)
     stopifnot(require(lubridate)==T)
     if(any(class(data)=="data.frame")){
         DATA <- data %>%
             mutate(DATE = as.Date(DATE, format= "%m/%d/%Y"),
-                   Station_number = 1,
+                   Station_number = stn,
                    Year = year(DATE),
                    Day = yday(DATE),
                    SRAD = round(SRAD*1000, 2),
@@ -45,7 +54,7 @@ Make_WTH_ORYZA <- function(data, path, local, lat, lon, alt) {
         } else if(str_detect(data, ".csv")==T){
     DATA <- read.csv(paste0(path,"//", data), header = T) %>%
         mutate(DATE = as.Date(DATE, format= "%m/%d/%Y"),
-               Station_number = 1,
+               Station_number = stn,
                Year = year(DATE),
                Day = yday(DATE),
                SRAD = round(SRAD*1000, 2),
@@ -61,59 +70,42 @@ Make_WTH_ORYZA <- function(data, path, local, lat, lon, alt) {
 dir.create(paste0(path,"/WTH"), showWarnings = FALSE)
 set_head <- paste(lon, lat, alt, 0, 0, sep = ",")    
 #DATA=read.table(file, head=T)  
-year_i=min(DATA$Year)
-year_f=max(DATA$Year)
-
-
-#Crea matrix para orgnizar datos
-year=cbind(year_i:year_f) %>%
-    as.data.frame()
-
-
-dates_wth=str_sub(year[1,1],-3,-1)
-
-for (z in 2:nrow(year)){
-    dates_wth=rbind(dates_wth,(str_sub(year[z,1],-3,-1)))  
-}
-
-dates_wth <- as.data.frame(dates_wth)
-
-wth_year=list()
-
-for (n in year_i:year_f){
-    
-    wth_year[[n-(year_i-1)]]=DATA[DATA$Year==n,1:9]
-    a=dates_wth[n-(year_i-1),1]
-    b=paste(path,"//WTH/" ,local, 1, ".",a,sep="")
-    sink(b)
+data_list <- split(DATA, DATA$Year)
+lapply(data_list, function(x){
+    fname <- paste(path,"/WTH/" ,local, stn,".", str_sub(unique(x$Year), 2), sep = "")
+    sink(file=fname)
     cat(set_head)
     cat("\n")
-    write.table(wth_year[[n-(year_i-1)]],sep=",",row.names=F,col.names=F)
-    sink()
-    
-}
-print("DONE!")
+    write.table(x ,sep=",",row.names=F,col.names=F)
+    sink()})
+
 }
 
+#map(data_list, copy_wth)
+#data <- "weather_input.csv"
 #path <- getwd() 
 #local<- "AIHU"
+#lat <- 3.5
+#lon <- -75.5
+#alt <- 250
 #Make_WTH_ORYZA(AIHU$WTH_obs, path,local, 3.4, -72, 250)
 #Make_WTH_ORYZA("weather_input.csv", path,local, 3.4, -72, 250)
 
-
+#library(tidyverse)
 #list.files(pattern=".RData") %>% lapply(load, .GlobalEnv)
-
+#locs_id <- ls()
 
 #path <- getwd()
 #wdata <- function (loc) {
-    data <- loc$WTH_obs
-    path <- path
-    local <- loc$AGRO_man$LOC_ID[1]
-    lat <- loc$AGRO_man$LAT[1]
-    lon <- loc$AGRO_man$LONG[1]
-    alt <- loc$AGRO_man$ALT[1]
-    
-    Make_WTH_ORYZA(data, path, local, lat, lon, alt)
-    }
-
-#wdata(YOCS)
+#    loc<- get(loc)
+#    data <- loc$WTH_obs
+#    path <- path
+#    local <- loc$AGRO_man$LOC_ID[1]
+#    lat <- loc$AGRO_man$LAT[1]
+#    lon <- loc$AGRO_man$LONG[1]
+#    alt <- loc$AGRO_man$ALT[1]
+#    
+#    Make_WTH_ORYZA(data, path, local, lat, lon, alt)
+#    }
+#
+#lapply(locs_id, wdata)

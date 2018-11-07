@@ -17,4 +17,33 @@ Project with many tools to use ORYZA crop model. It Includes functions to create
 * Research paper about [ORYZA V3.0](https://www.sciencedirect.com/science/article/pii/S0168192317300680)
 
 
+## Make_WTH_ORYZA.R
+Function to create ORYZA-model weather files.
+
+### Usage
+```
+require(tidyverse)
+require(lubridate)
+Make_WTH_ORYZA(data, path, local, lat, lon, alt, stn=1)
+```
+
+### Arguments
+
+* data: csv file name or data.frame.
+
+| Var_Name  |  Class| Unit |
+| --- | --- | --- | 
+| DATE |  Date | (mdy)|
+| TMAX |  num  | (oC) |
+| TMIN |  num  | (oC) |
+| RAIN |  num  | (mm) |
+| SRAD |  num  | (MJ) |
+| RHUM |  num  | (%)  |
+
+* `path:`      path folder or working directory
+* `local:`     4 letters string of locality name. "AIHU"--> Aipe, Huila
+* `lat:`       latitud (decimal degrees)
+* `lon:`       longitud (decimal degrees)
+* `alt:`       altitude (meters above sea level)
+* `stn:`       Station number. default=1
 
