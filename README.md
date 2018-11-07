@@ -29,7 +29,7 @@ Make_WTH_ORYZA(data, path, local, lat, lon, alt, stn=1)
 
 ### Arguments
 
-* `data:` csv file name or data.frame of daily values.
+* `data:` csv file name or data.frame of daily values. [View Weather Template](https://raw.githubusercontent.com/jrodriguez88/ORYZA_Model_RTOOLS/master/weather_input.csv)
 
 | Var_Name | Description  |  Class| Unit |
 | --- | --- | --- | --- | 
@@ -58,7 +58,7 @@ Make_SOIL_ORYZA(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', S
 
 ### Arguments
 
-* `data:` csv file name or data.frame. Template-
+* `data:` csv file name or data.frame. [View Soil Template](https://raw.githubusercontent.com/jrodriguez88/ORYZA_Model_RTOOLS/master/soil_input.csv)
 
 | Var_Name  | Description | Class| Unit |
 | --- | --- | --- | --- |
