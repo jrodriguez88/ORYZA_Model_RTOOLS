@@ -76,7 +76,7 @@ Make_SOIL_ORYZA(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', S
 | SRD| Real density	| 	numeric	| 	g/cm³	| 	| 
 | SPOR| Total soil porosity	| 	numeric	| 	%	| 
 | WCF| Water content at field	| 	numeric	| 	%	| 
-| SSKS| Saturated hydraulic conductivity	| 	numeric	| 	cm/h	| 
+| SSKS| Saturated hydraulic conductivity	| 	numeric	| 	cm/day	| 
 | WCST| Saturated volumetric water content	| 	numeric	| 	%	| 
 | WCFC| Volumetric water content at field capacity	| 	numeric	| 	%	| 
 | WC1B| Volumetric water content at 1 bar	| 	numeric	| 	%	| 
