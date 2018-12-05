@@ -1,29 +1,40 @@
-library(tidyverse)
-
 ## Make Soil
-load("SOILDB_raw.RData")
-data -> raw_data <- soil_data
-soil_data <- split(soil_data, soil_data$ID)
-path <- getwd()
+#load("SOILDB_raw.RData")
+#data -> raw_data 
+#
+soil_data <- data %>%
+    left_join(SKS_Final, by = c("ID", "DEPTH"))%>%
+    mutate(DEPTH_range = DEPTH,
+           DEPTH = 20,
+           SSKS = ks_ptf_resample,
+           WCAD = WCR_Tomasella1(SAND, CLAY, GWCFC), 
+           SOC = DEPTH*SBDM*100*SCARBON/0.58,
+           SON = DEPTH*SBDM*SLON/10,
+           SNH4X = DEPTH*SBDM*SNH4/10,
+           SNO3X = DEPTH*SBDM*SNO3/10)
 
+Soil_by_loc <- soil_data %>%
+    group_by(LOC_ID, DEPTH_range) %>%
+    summarize_if(is.numeric, mean)
+
+
+
+#soil_data <- split(soil_data, soil_data$ID)
+#path <- getwd()
+
+### require(tidyverse)
 ### ZRTMS Maximum rooting depth in the soil (m), 
 ### WL0I Initial ponded water depth at start of simulation (mm)"
 ### WCLI can take 3 values: Field Capacity ('FC'), 50% of Soil Saturation ('ST50'), Fraction of water content ('0.0'- '1.0') 
 ### RIWCLI Re-initialize switch RIWCLI is YES or NO
 ### SATAV Soil annual average temperature of the first layers
 
-Make_soil_ORYZA <- function(data, path, ZRTMS = 0.45, WL0I = 0, WCLI='0.3' , RIWCLI = 'NO', SATAV=20){
+Make_SOIL_ORYZA <- function(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', SATAV=25){
     stopifnot(require(tidyverse)==T)
     inpp <- function(x, div=1){paste0(round(data[,x]/div,2), collapse = ", ")}
     dirfol <- paste0(path,'/', 'SOIL')
     dir.create((paste0(path,"/SOIL")), showWarnings = FALSE)
 
-data <- data %>%
-    mutate(DEPTH=20, KST=c(100, 150, 170), WCAD=10, 
-           SOC=DEPTH*SBDM*100*SCARBON/0.58,
-           SON=DEPTH*SBDM*SLON/10,
-           SNH4X=DEPTH*SBDM*SNH4/10,
-           SNO3X=DEPTH*SBDM*SNO3/10)
 sink(file=paste0(dirfol,'/', unique(data["ID"]), ".sol"), append = F)
 
 ########################################
@@ -31,16 +42,16 @@ sink(file=paste0(dirfol,'/', unique(data["ID"]), ".sol"), append = F)
 ########################################
 cat("**********************************************************************",sep = '\n')
 cat("* Template soil data file for PADDY soil water balance model.        *",sep = '\n')
-cat("* File name   : PADDYIN.DAT                                          *",sep = '\n')
-cat(paste0("* Soil        : ", unique(data["LOC_ID"]),"            *",sep = '\n'))
-cat(paste0('* File name        : ', unique(data["ID"]), ".sol", '                     *'), sep = '\n') 
-cat(paste0('* Sampling date      : ',data$SAMPLING_DATE[1] , '                                            *') ,sep = '\n') 
-cat(paste0('* Additional info  : ', 'Create with https://github.com/jrodriguez88', '     *') ,sep = '\n') 
+cat("**********************************************************************",sep = '\n')
+cat(paste0("* Soil        : ", unique(data["LOC_ID"]), " - texture classes:", paste(data[1:nrow(data),"STC"], collapse = "-"), sep = '\n'))
+cat(paste0('* File name        : ', unique(data["ID"]), ".sol"), sep = '\n') 
+cat(paste0('* Sampling date      : ',data$SAMPLING_DATE[1] ) ,sep = '\n') 
+cat(paste0('* Additional info  : ', 'Create with https://github.com/jrodriguez88/ORYZA_Model_RTOOLS') ,sep = '\n') 
 cat('*--------------------------------------------------------------------*',sep = '\n') 
 
-
+cat('\n')
 #"* Give code name of soil data file to match the water balance PADDY:"
-#"SCODE = 'PADDY'"
+cat("SCODE = 'PADDY'", sep = '\n')
 cat('\n')
 cat('*---------------------------------------------------------------*
 * 1. Various soil and management parameters
@@ -100,7 +111,7 @@ cat("SWITVP = -1 ! Fixed percolation rate", sep = '\n')
 #"*SWITVP = 1 ! Calculate percolation"
 #"*SWITVP = 2 ! Fixed percolation rate as function of time"
 #"* If SWITVP = -1, supply fixed percolation rate (mm d-1):"
-cat(paste0("FIXPERC = ", data[nrow(data),"KST"]/10, "."), sep = '\n')
+cat(paste0("FIXPERC = ", data[nrow(data),"SSKS"]/10, "."), sep = '\n')
 
 #"* If SWITVP = 0, supply table of percolation rate (mm d-1; Y-value)"
 #"* as function of water table depth (cm; X value):"
@@ -161,7 +172,7 @@ cat("*-----------------------------------------------------------------*
 *-----------------------------------------------------------------*")
 cat('\n')
 #"* Saturated hydraulic conductivity, for each soil layer (cm d-1) (always required!):"
-cat(paste0("KST = ", inpp("KST"), sep='\n'))
+cat(paste0("KST = ", inpp("SSKS"), sep='\n'))
 
 #"* Saturated volumetric water content, for each soil layer (m3 m-3)(always required!):"
 cat(paste0("WCST = ", inpp("WCST", 100), sep='\n'))
@@ -234,4 +245,11 @@ writeLines(a[1:nrow(data)])
 sink()
 }
 
-lapply(soil_data, Make_soil_ORYZA, path=path)
+#lapply(soil_data, Make_SOIL_ORYZA, path=path)
+
+
+
+
+
+
+

@@ -75,7 +75,7 @@ TAE_BP_Saxton <- function(S,C,OM) {
 #TAE_BP_Saxton(S,C,OM)
 
 # Saturated moisture (0 kPa), normal density, %v
-WCST_Saxton <- function(S,C,OM) {
+WCST_Saxton1 <- function(S,C,OM) {
     
     WCFC <- WCFC_Saxton(S,C,OM)    
     WCSAT <- WCSAT_Saxton(S,C,OM)
