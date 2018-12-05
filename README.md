@@ -33,7 +33,7 @@ Make_WTH_ORYZA(data, path, local, lat, lon, alt, stn=1)
 
 | Var_Name | Description  |  Class| Unit |
 | --- | --- | --- | --- | 
-| DATE |  Date in "mm/dd/yyyy" | Date | (mdy)|
+| DATE |  Date in "mm/dd/yyyy" | Date | MM/DD/YYYY |
 | TMAX |  Maximum temperature | num  | (oC) |
 | TMIN |  Minimun temperature | num  | (oC) |
 | RAIN |  Rain or Precipitation | num  | (mm) |
@@ -64,7 +64,7 @@ Make_SOIL_ORYZA(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', S
 | --- | --- | --- | --- |
 | ID |	Trial ID |	character | XXXX |
 | SAMPLING_DATE | Sampling date		| date	| 	MM/DD/YYYY	| 
-| DEPTH |	Soil depth 	| 	numeric	| 	cm	| 
+| DEPTH |	Soil depth (Thickness) | 	numeric	| 	cm	| 
 | PH |	pH in water	| 	numeric	| 	units	| 
 | SCARBON |	Total soil carbon	| 	numeric	| 	g/kg	| 
 | SCEC| Cation exchange capacity	| 	numeric	| 	cmol/kg	| 
@@ -76,7 +76,7 @@ Make_SOIL_ORYZA(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', S
 | SRD| Real density	| 	numeric	| 	g/cm³	| 	| 
 | SPOR| Total soil porosity	| 	numeric	| 	%	| 
 | WCF| Water content at field	| 	numeric	| 	%	| 
-| SSKS| Saturated hydraulic conductivity	| 	numeric	| 	cm/h	| 
+| SSKS| Saturated hydraulic conductivity	| 	numeric	| 	cm/day	| 
 | WCST| Saturated volumetric water content	| 	numeric	| 	%	| 
 | WCFC| Volumetric water content at field capacity	| 	numeric	| 	%	| 
 | WC1B| Volumetric water content at 1 bar	| 	numeric	| 	%	| 
