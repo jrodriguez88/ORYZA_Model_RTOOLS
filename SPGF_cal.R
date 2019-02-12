@@ -13,7 +13,7 @@
 #library(tidyverse)
 #library(lubridate)
 
-dirfol <- getwd()
+#path_data <- getwd()
 #CULTIVAR <- "FED2000"
 
 ## SPGF_cal function compute SPGF from experimental data, It take yield traits (spikelet number), 
@@ -21,10 +21,16 @@ dirfol <- getwd()
 ##          number and and crop growth between panicle initiation and flowering.
 
 ## Function to extract variables (from INPUT_data.xls template) requiere to SPGF calculation
-SPGF_cal <- function(dirfol=dirfol, filename) {
+SPGF_cal <- function(path_data, filename, max_diff = 5) {
     
+    read_INPUT_data <- function(file) {
+        sheets <- readxl::excel_sheets(file)
+        x <-    lapply(sheets, function(X) readxl::read_excel(file, sheet = X))
+        names(x) <- sheets
+        x
+    }
  ##Load data for each workbook (XLSX)   
-    INPUT_data <- read_INPUT_data(filename)
+    INPUT_data <- read_INPUT_data(paste0(path_data, filename))
     
  ##Extract Spikelets number from YIELD_obs and join with Phenology observations (PHEN_bs)   
     SPIK_by_EXP <- INPUT_data$YIELD_obs %>%
@@ -57,12 +63,14 @@ SPGF_cal <- function(dirfol=dirfol, filename) {
   ##Join data and compute variables to SPGF calculation  
     SPIK_by_EXP %>%
         left_join(WAGT_PI, by = "ID")%>%left_join(WAGT_FL, by = "ID") %>%
-        mutate(diff_pi_fl=(WAGT_FL-WAGT_PI)/10) #(g/m²)
+        mutate(diff_pi_fl=(WAGT_FL-WAGT_PI)/10) %>%#(g/m²)
+        filter(diff_fl<max_diff, diff_pi<max_diff)
+        
 }
 
 
 ## Create SPGF_df: Compute SPGF variables by locality and bind rows 
-SPGF_df <- lapply(list.files(path = dirfol, pattern = ".xlsx"), function(x){SPGF_cal(filename=x)})%>%
+SPGF_df <- pmap(list(path_data=path_data,  filename = list.files(path = path_data, pattern = cultivar)), SPGF_cal) %>%
     bind_rows()%>%mutate(LOC_ID=substr(ID, 1,4))
 
 ## Linear model between Spikelet number (number/ m²) and crop growth between panicle initiation and flowering (g/m²)
@@ -74,10 +82,10 @@ print(paste0("SPGF = ", round(coef(lm_spgf)[[2]]*1000), ".", "    ! Spikelet gro
 ## Scatterplot data and lm coef
 plot_spgf <- ggplot(SPGF_df, aes(diff_pi_fl, SPIK_M2_avg))+
     geom_point(aes(color=LOC_ID))+
-    geom_smooth(method = "lm", se = F)+
+    geom_smooth(method = "lm", se = F, linetype="twodash")+
     theme_bw()+
     xlab("Growth between PI and flowering (g/m²)")+
-    ylab("Spikelets/m²")+
+    ylab("Spikelets/m²") +
     annotate("text", x=-Inf, y=c(max(SPGF_df$SPIK_M2_avg), max(SPGF_df$SPIK_M2_avg)*0.95, max(SPGF_df$SPIK_M2_avg)*0.90, max(SPGF_df$SPIK_M2_avg)*0.85) , hjust=-0.1,vjust=0, 
              label=c(paste0("y = ", round(summary(lm_spgf)$`coefficients`[2,1],2),"x"),
                      paste("n =", length(SPGF_df)),
