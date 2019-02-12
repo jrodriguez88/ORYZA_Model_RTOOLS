@@ -107,12 +107,17 @@ runmodes_oryza <- function(){
 #and STTIME=365-(yday(PHEN_obs$PDAT)[i])
 #i <- 8
 timer_oryza <- function(){
-    if (yday(INPUT_data$PHEN_obs$PDAT)[i]-90<0){
-    a=year(INPUT_data$PHEN_obs$PDAT)[i]-1
-    b=365+(yday(INPUT_data$PHEN_obs$PDAT)[i]-90)} else {
-       a= year(INPUT_data$PHEN_obs$PDAT)[i]
-       b= yday(INPUT_data$PHEN_obs$PDAT)[i]-90
-    }
+#    if (yday(INPUT_data$PHEN_obs$PDAT)[i]-3<0){
+#    a=year(INPUT_data$PHEN_obs$PDAT)[i]-1
+#    b=365+(yday(INPUT_data$PHEN_obs$PDAT)[i]-3)} else {
+#       a= year(INPUT_data$PHEN_obs$PDAT)[i]
+#       b= yday(INPUT_data$PHEN_obs$PDAT)[i]-3
+#    }
+    a= year(INPUT_data$PHEN_obs$EDAT)[i]
+    b= yday(INPUT_data$PHEN_obs$EDAT)[i]-3
+    
+    
+
     
     sink(file = names[[i]], append = T)
 #for (i in 1:1){
@@ -530,13 +535,13 @@ WAGT_tb <- function(){
 
 #Make_ORYZA_Exp()
 
-local<- local
-files <- list.files(pattern = paste0(local, "_"))
+#local<- local
+files <- list.files("DATA", pattern = "xlsx")
 
 for (e in 1:length(files)) {
     
     
-    INPUT_data <- read_INPUT_data(files[e])
+    INPUT_data <- read_INPUT_data(paste0(getwd(),"/DATA/", files[e]))
     
     names<- list()
     #Make_ORYZA_Exp <- function(){
