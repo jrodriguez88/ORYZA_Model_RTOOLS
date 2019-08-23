@@ -21,7 +21,7 @@
 ##          number and and crop growth between panicle initiation and flowering.
 
 ## Function to extract variables (from INPUT_data.xls template) requiere to SPGF calculation
-SPGF_cal <- function(path_data, filename, max_diff = 5) {
+SPGF_extract <- function(path_data, filename, max_diff = 5) {
     
     read_INPUT_data <- function(file) {
         sheets <- readxl::excel_sheets(file)
@@ -29,10 +29,10 @@ SPGF_cal <- function(path_data, filename, max_diff = 5) {
         names(x) <- sheets
         x
     }
- ##Load data for each workbook (XLSX)   
+    ##Load data for each workbook (XLSX)   
     INPUT_data <- read_INPUT_data(paste0(path_data, filename))
     
- ##Extract Spikelets number from YIELD_obs and join with Phenology observations (PHEN_bs)   
+    ##Extract Spikelets number from YIELD_obs and join with Phenology observations (PHEN_bs)   
     SPIK_by_EXP <- INPUT_data$YIELD_obs %>%
         mutate(SPIK_M2_avg=PAN_M2*GT_PAN,
                SPIK_M2_min=(PAN_M2-PAN_M2_SD)*(GT_PAN-GT_PAN_SD),
@@ -40,7 +40,7 @@ SPGF_cal <- function(path_data, filename, max_diff = 5) {
         left_join(INPUT_data$PHEN_obs, by="ID")%>%
         select(ID, contains("SPIK_M2"), IDAT, FDAT)
     
- ##Extract  Total dry weight at panicle initiation or closest sampling date
+    ##Extract  Total dry weight at panicle initiation or closest sampling date
     WAGT_PI <- INPUT_data$PLANT_gro %>%
         inner_join(SPIK_by_EXP, by="ID") %>%
         mutate(diff_pi=abs(as.integer(difftime(SAMPLING_DATE, IDAT, units = "days"))),
@@ -50,7 +50,7 @@ SPGF_cal <- function(path_data, filename, max_diff = 5) {
         filter(diff_pi==min(diff_pi))%>%
         select(ID, diff_pi, contains("WAGT_PI"))
     
- ##Extract  Total dry weight at flowering initiation or closest sampling date    
+    ##Extract  Total dry weight at flowering initiation or closest sampling date    
     WAGT_FL <- INPUT_data$PLANT_gro %>%
         inner_join(SPIK_by_EXP, by="ID") %>%
         mutate(diff_fl=abs(as.integer(difftime(SAMPLING_DATE, FDAT, units = "days"))),
@@ -60,39 +60,30 @@ SPGF_cal <- function(path_data, filename, max_diff = 5) {
         filter(diff_fl==min(diff_fl))%>%
         select(ID, diff_fl, contains("WAGT_FL"))
     
-  ##Join data and compute variables to SPGF calculation  
+    ##Join data and compute variables to SPGF calculation  
     SPIK_by_EXP %>%
         left_join(WAGT_PI, by = "ID")%>%left_join(WAGT_FL, by = "ID") %>%
         mutate(diff_pi_fl=(WAGT_FL-WAGT_PI)/10) %>%#(g/m²)
         filter(diff_fl<max_diff, diff_pi<max_diff)
-        
+    
 }
 
 
-## Create SPGF_df: Compute SPGF variables by locality and bind rows 
-SPGF_df <- pmap(list(path_data=path_data,  filename = list.files(path = path_data, pattern = cultivar)), SPGF_cal) %>%
-    bind_rows()%>%mutate(LOC_ID=substr(ID, 1,4))
+## Function to calculate SPGF by lm 
 
-## Linear model between Spikelet number (number/ m²) and crop growth between panicle initiation and flowering (g/m²)
-lm_spgf <- lm(formula=SPIK_M2_avg ~ diff_pi_fl, data = SPGF_df)
-
-## Print SPGF compute from lm-slope
-print(paste0("SPGF = ", round(coef(lm_spgf)[[2]]*1000), ".", "    ! Spikelet growth factor (no kg-1)"))
-
-## Scatterplot data and lm coef
-plot_spgf <- ggplot(SPGF_df, aes(diff_pi_fl, SPIK_M2_avg))+
-    geom_point(aes(color=LOC_ID))+
-    geom_smooth(method = "lm", se = F, linetype="twodash")+
-    theme_bw()+
-    xlab("Growth between PI and flowering (g/m²)")+
-    ylab("Spikelets/m²") +
-    annotate("text", x=-Inf, y=c(max(SPGF_df$SPIK_M2_avg), max(SPGF_df$SPIK_M2_avg)*0.95, max(SPGF_df$SPIK_M2_avg)*0.90, max(SPGF_df$SPIK_M2_avg)*0.85) , hjust=-0.1,vjust=0, 
-             label=c(paste0("y = ", round(summary(lm_spgf)$`coefficients`[2,1],2),"x"),
-                     paste("n =", length(SPGF_df)),
-                     paste("r² =", round(summary(lm_spgf)$`r.squared`,2)), 
-                     paste("Pr(>|t|) =", round(summary(lm_spgf)$`coefficients`[2,4],4))))
-
-
-print(plot_spgf)
-
-##
+SPGF_cal <- function(path_data, files, out="") {
+    
+    ## Create SPGF_df: Compute SPGF variables by locality and bind rows 
+    SPGF_df <- pmap(list(path_data=path_data,  filename = files), SPGF_extract) %>%
+        bind_rows()%>%mutate(LOC_ID=substr(ID, 1,4))
+    
+    SPGF_df <<- SPGF_df %>% filter(ID != out)
+    
+    
+    ## Linear model between Spikelet number (number/ m²) and crop growth between panicle initiation and flowering (g/m²)
+    lm_spgf <- lm(formula = SPIK_M2_max ~ diff_pi_fl, data = SPGF_df)
+    
+    ## Print SPGF compute from lm-slope
+    sprintf("%.1f", coef(lm_spgf)[[2]]*1000) # Spikelet growth factor (no kg-1)"))
+    
+}

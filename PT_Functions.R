@@ -1,6 +1,6 @@
 #####################################
 ##### SOIL FUCTIONS for SAXTON & RAWLS (SR): SOIL WATER CHARACTERISTICS ESTIMATES
-#####
+##### http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.452.9733&rep=rep1&type=pdf
 ##### by JRE- https://github.com/jrodriguez88 
 ###############################################################################
 
@@ -427,7 +427,7 @@ SSKS_Rawls <- function(S,C){
 #  doi:10.1016/j.compag.2007.01.001
 
 
-#######################
+####################### https://www.researchgate.net/publication/269802021_Estimating_Saturated_Hydraulic_Conductivity_from_Soil_Porosity
 ### Method developed by Suleiman and Ritchie (2001), 
 
 SSKS_Sul_Rit <- function(S, C, OM, SBDM, SPOR=NA, WCFC=NA){

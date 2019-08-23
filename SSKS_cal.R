@@ -3,10 +3,10 @@
 # Git Repository: https://github.com/jrodriguez88/ORYZA_Model_RTOOLS 
 
 
-require(RCurl)
+#require(RCurl)
 
 # Load PTFs
-source("https://raw.githubusercontent.com/jrodriguez88/ORYZA_Model_RTOOLS/master/PT_Functions.R")
+#source("https://raw.githubusercontent.com/jrodriguez88/ORYZA_Model_RTOOLS/master/PT_Functions.R")
 
 # S Sand (%)
 # C Clay (%)

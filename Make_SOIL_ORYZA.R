@@ -2,25 +2,30 @@
 #load("SOILDB_raw.RData")
 #data -> raw_data 
 #
-soil_data <- data %>%
-    left_join(SKS_Final, by = c("ID", "DEPTH"))%>%
-    mutate(DEPTH_range = DEPTH,
-           DEPTH = 20,
-           SSKS = ks_ptf_resample,
-           WCAD = WCR_Tomasella1(SAND, CLAY, GWCFC), 
-           SOC = DEPTH*SBDM*100*SCARBON/0.58,
-           SON = DEPTH*SBDM*SLON/10,
-           SNH4X = DEPTH*SBDM*SNH4/10,
-           SNO3X = DEPTH*SBDM*SNO3/10)
+#soil_data <- data %>%
+#    left_join(SKS_Final, by = c("ID", "DEPTH"))%>%
+#    mutate(DEPTH_range = DEPTH,
+#           DEPTH = 20,
+#           SSKS = ks_ptf_resample,
+#           WCAD = WCR_Tomasella1(SAND, CLAY, GWCFC),
+#           STC=get_STC(SAND, CLAY)) 
+
 
 Soil_by_loc <- soil_data %>%
     group_by(LOC_ID, DEPTH_range) %>%
-    summarize_if(is.numeric, mean)
+    summarize_if(is.numeric, mean)%>%
+    mutate(ID=LOC_ID, STC=get_STC(SAND, CLAY))%>%
+    ungroup() %>%
+    as.data.frame()%>%
+    split(.$ID)
+
 
 
 
 #soil_data <- split(soil_data, soil_data$ID)
 #path <- getwd()
+#lapply(soil_data, Make_SOIL_ORYZA, path=path)
+#lapply(Soil_by_loc, Make_SOIL_ORYZA, path=path)
 
 ### require(tidyverse)
 ### ZRTMS Maximum rooting depth in the soil (m), 
@@ -29,11 +34,16 @@ Soil_by_loc <- soil_data %>%
 ### RIWCLI Re-initialize switch RIWCLI is YES or NO
 ### SATAV Soil annual average temperature of the first layers
 
-Make_SOIL_ORYZA <- function(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', SATAV=25){
+Make_SOIL_ORYZA <- function(data, path, ZRTMS = 0.50, WL0I = 0, WCLI='FC' , RIWCLI = 'NO', SATAV=24){
     stopifnot(require(tidyverse)==T)
-    inpp <- function(x, div=1){paste0(round(data[,x]/div,2), collapse = ", ")}
+    inpp <- function(x, div=1){paste0(sprintf("%.2f", (data[[x]]/div)), collapse = ", ")}
     dirfol <- paste0(path,'/', 'SOIL')
     dir.create((paste0(path,"/SOIL")), showWarnings = FALSE)
+    data <- data %>%
+        mutate(SOC = DEPTH*SBDM*100*SCARBON/0.58,
+               SON = DEPTH*SBDM*SLON/10,
+               SNH4X = DEPTH*SBDM*SNH4/10,
+               SNO3X = DEPTH*SBDM*SNO3/10)
 
 sink(file=paste0(dirfol,'/', unique(data["ID"]), ".sol"), append = F)
 
@@ -111,7 +121,7 @@ cat("SWITVP = -1 ! Fixed percolation rate", sep = '\n')
 #"*SWITVP = 1 ! Calculate percolation"
 #"*SWITVP = 2 ! Fixed percolation rate as function of time"
 #"* If SWITVP = -1, supply fixed percolation rate (mm d-1):"
-cat(paste0("FIXPERC = ", data[nrow(data),"SSKS"]/10, "."), sep = '\n')
+cat(paste0("FIXPERC = ", data[nrow(data),"SSKS"]/10), sep = '\n')
 
 #"* If SWITVP = 0, supply table of percolation rate (mm d-1; Y-value)"
 #"* as function of water table depth (cm; X value):"
@@ -245,7 +255,7 @@ writeLines(a[1:nrow(data)])
 sink()
 }
 
-#lapply(soil_data, Make_SOIL_ORYZA, path=path)
+
 
 
 

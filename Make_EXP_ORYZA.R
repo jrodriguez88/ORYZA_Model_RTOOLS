@@ -18,13 +18,13 @@
 #### Load Requeriments      ####
 ################################
 
-if(require(lubridate)==FALSE){install.packages("lubridate")}
-if(require(readxl)==FALSE){install.packages("readxl")}
-if(require(RCurl)==FALSE){install.packages("RCurl")}
-if(require(tidyverse)==FALSE){install.packages("tidyverse")}
-if(require(magrittr)==FALSE){install.packages("magrittr")}
-if(require(data.table)==FALSE){install.packages("data.table")}
-if(require(plyr)==FALSE){install.packages("plyr")}
+#if(require(lubridate)==FALSE){install.packages("lubridate")}
+#if(require(readxl)==FALSE){install.packages("readxl")}
+#if(require(RCurl)==FALSE){install.packages("RCurl")}
+#if(require(tidyverse)==FALSE){install.packages("tidyverse")}
+#if(require(magrittr)==FALSE){install.packages("magrittr")}
+#if(require(data.table)==FALSE){install.packages("data.table")}
+#if(require(plyr)==FALSE){install.packages("plyr")}
 
 
 #i<- 1
@@ -114,7 +114,7 @@ timer_oryza <- function(){
 #       b= yday(INPUT_data$PHEN_obs$PDAT)[i]-3
 #    }
     a= year(INPUT_data$PHEN_obs$EDAT)[i]
-    b= yday(INPUT_data$PHEN_obs$EDAT)[i]-3
+    b= yday(INPUT_data$PHEN_obs$EDAT)[i]
     
     
 
@@ -536,7 +536,10 @@ WAGT_tb <- function(){
 #Make_ORYZA_Exp()
 
 #local<- local
-files <- list.files("DATA", pattern = "xlsx")
+#files <- list.files("DATA", pattern = "xlsx")
+
+
+
 
 for (e in 1:length(files)) {
     
@@ -571,7 +574,10 @@ for (e in 1:length(files)) {
 }
 
 
-
+rm(INPUT_data)
+rm(names)
+rm(i)
+rm(e)
 
 
 

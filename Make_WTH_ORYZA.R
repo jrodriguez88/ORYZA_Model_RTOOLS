@@ -96,16 +96,15 @@ lapply(data_list, function(x){
 #locs_id <- ls()
 
 #path <- getwd()
-#wdata <- function (loc) {
-#    loc<- get(loc)
-#    data <- loc$WTH_obs
-#    path <- path
-#    local <- loc$AGRO_man$LOC_ID[1]
-#    lat <- loc$AGRO_man$LAT[1]
-#    lon <- loc$AGRO_man$LONG[1]
-#    alt <- loc$AGRO_man$ALT[1]
-#    
-#    Make_WTH_ORYZA(data, path, local, lat, lon, alt)
-#    }
-#
+wdata_list <- function (data, path) {
+    wdata <- data$WTH_obs
+    local <- data$AGRO_man$LOC_ID[1]
+    lat <- data$AGRO_man$LAT[1]
+    lon <- data$AGRO_man$LONG[1]
+    alt <- data$AGRO_man$ALT[1]
+    
+    Make_WTH_ORYZA(wdata, path, local, lat, lon, alt)
+    }
+
+
 #lapply(locs_id, wdata)
