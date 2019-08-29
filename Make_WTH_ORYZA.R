@@ -34,7 +34,7 @@
 ## 'alt':   altitude (meters above sea level)
 
 
-Make_WTH_ORYZA <- function(data, path, local, lat, lon, alt, stn=1) {
+make_wth_oryza <- function(data, path, local, lat, lon, alt, stn=1) {
     stopifnot(require(tidyverse)==T)
     stopifnot(require(lubridate)==T)
     if(any(class(data)=="data.frame")){
@@ -103,7 +103,7 @@ wdata_list <- function (data, path) {
     lon <- data$AGRO_man$LONG[1]
     alt <- data$AGRO_man$ALT[1]
     
-    Make_WTH_ORYZA(wdata, path, local, lat, lon, alt)
+    make_wth_oryza(wdata, path, local, lat, lon, alt)
     }
 
 
